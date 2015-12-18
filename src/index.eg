@@ -1,0 +1,104 @@
+
+require:
+   path
+   urlencode
+
+
+class ShareButtons:
+
+   constructor{url, title, tagline, @options} =
+      if not url:
+         throw E.quaint-share-buttons with
+            'Document must have an url in order to be shared.'
+      if not title:
+         throw E.quaint-share-buttons with
+            'Document must have a title in order to be shared.'
+      @url = urlencode{url}
+      @title = urlencode{title}
+      @tagline = urlencode{tagline or ""}
+
+   link{site, title, href, type} =
+      shb = 'assets/share-buttons/{site}.png'
+      a.share %
+         class = site + "-" + type
+         href = href
+         title = title
+         target = "_blank"
+         img % src = path.join{@options.resource-path, shb}
+
+   make{site} =
+      @['make_{@options.type}']{site}
+
+   make_button{match site} =
+      do:
+         lnk{a, b, c} = @link{a, b, c, .button}
+      .facebook ->
+         lnk{.Facebook, "Share on Facebook"} with
+            'https://www.facebook.com/sharer/sharer.php?u={@url}&t={@title}'
+      .twitter ->
+         lnk{.Twitter, "Tweet"} with
+            'https://twitter.com/intent/tweet?text={@title}:%20{@url}'
+      "google+" ->
+         lnk{"Google+", "Share on Google+"} with
+            'https://plus.google.com/share?url={@url}'
+      .reddit ->
+         lnk{.Reddit, "Submit to Reddit"} with
+            'http://www.reddit.com/submit?url={@url}&title={@title}'
+      .email ->
+         lnk{.Email, "E-mail"} with
+            'mailto:?subject={@title}&body={@tagline}:%20{@url}'
+      else ->
+         throw E.unknown-sharing-method{'Unknown sharing method: "{site}"'}
+
+
+install{@, options} =
+   @register-macros with {
+      share{engine, body} =
+         engine.deferred with {engine, documents} ->
+            meta = documents.meta
+            maker =
+               ShareButtons with
+                  meta.get-raw{"url"}
+                  meta.get-raw{"title"}??.trim{}
+                  meta.get-raw{"tagline"}??.replace{R.g"\n *|.$", " "}.trim{}
+                  resource-path = meta.get-raw{"resourceRel"}
+                  type = options.type or "button"
+            .share-buttons %
+               body.raw{}.split{"\n"} each line when line ->
+                  maker.make{line.trim{}}
+   }
+
+   @register-resources with {
+      "js/share-buttons.js" => {
+         path = path.join{__dirname, "../client/share.js"}
+         contents = true
+         type = .js
+         method = .head
+      }
+      "js/share-buttons.js/call" => {
+         path = null
+         contents = "$$quaintShareButtonsPopups();"
+         inline = true
+         type = .js
+         method = .body
+      }
+      "assets/share-buttons/_" => {
+         path = null
+         contents = null
+         type = null
+         dependencies = {
+            "assets/share-buttons" => #copy{path.join{__dirname, "../assets"}}
+         }
+      }
+   }
+
+
+main{*match} =
+   {@, options = {=}} when @is-quaint-engine ->
+      install{@, options}
+   {options = {=}} ->
+      {@} -> main{@, options}
+
+provide = main
+
+
