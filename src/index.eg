@@ -18,7 +18,7 @@ class ShareButtons:
       @tagline = urlencode{tagline or ""}
 
    link{site, title, href, type} =
-      shb = 'assets/share-buttons/{site}.png'
+      shb = 'assets/share-buttons/{site}.svg'
       a.share %
          class = site + "-" + type
          href = href
@@ -33,19 +33,19 @@ class ShareButtons:
       do:
          lnk{a, b, c} = @link{a, b, c, .button}
       .facebook ->
-         lnk{.Facebook, "Share on Facebook"} with
+         lnk{.facebook, "Share on Facebook"} with
             'https://www.facebook.com/sharer/sharer.php?u={@url}&t={@title}'
       .twitter ->
-         lnk{.Twitter, "Tweet"} with
+         lnk{.twitter, "Tweet"} with
             'https://twitter.com/intent/tweet?url={@url}&text={@title}'
       "google+" ->
-         lnk{"Google+", "Share on Google+"} with
+         lnk{.googleplus, "Share on Google+"} with
             'https://plus.google.com/share?url={@url}'
       .reddit ->
-         lnk{.Reddit, "Submit to Reddit"} with
+         lnk{.reddit, "Submit to Reddit"} with
             'http://www.reddit.com/submit?url={@url}&title={@title}'
       .email ->
-         lnk{.Email, "E-mail"} with
+         lnk{.email, "E-mail"} with
             'mailto:?subject={@title}&body={@tagline}:%20{@url}'
       else ->
          throw E.unknown-sharing-method{'Unknown sharing method: "{site}"'}
