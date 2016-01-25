@@ -7,7 +7,7 @@ This plugin lets you embed share buttons on a page.
 
 ## Install
 
-    npm install quaint-share-buttons -g
+    quaint --setup share-buttons
 
 
 ## Sample use
