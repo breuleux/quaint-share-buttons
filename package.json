@@ -1,7 +1,7 @@
 {
   "name": "quaint-share-buttons",
   "description": "Put share buttons in a Quaint document",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "format": "cjs",
   "repository": {
     "type": "git",
